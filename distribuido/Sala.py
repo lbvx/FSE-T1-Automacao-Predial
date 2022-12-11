@@ -1,7 +1,7 @@
 import json
 import RPi.GPIO as GPIO
 import threading
-from time import sleep
+from time import sleep, time
 import Adafruit_DHT as DHT
 
 class Sala:
@@ -11,6 +11,7 @@ class Sala:
     pessoasQtd : int
     temp : float
     umid : float
+    sistemaAlarme : bool
 
     def __init__(self, config:str) -> None:
         with open(config) as f:
@@ -49,6 +50,7 @@ class Sala:
         self.estado = {k: False for k in self.output}
         self.dht22 = cfg['sensor_temperatura'][0]['gpio']
         self.pessoasQtd = 0
+        self.sistemaAlarme = False
 
         GPIO.setmode(GPIO.BCM) 
         for c in self.output.values():
@@ -59,6 +61,8 @@ class Sala:
 
         GPIO.add_event_detect(self.input['SC_IN'], GPIO.RISING)
         GPIO.add_event_detect(self.input['SC_OUT'], GPIO.RISING)
+
+        self.reset()
 
     def reset(self) -> None:
         for o in self.output:
@@ -84,16 +88,56 @@ class Sala:
         self.temp = d[1]
 
 class SalaThread(threading.Thread):
+    _tempoLampada : float
+    _spresRecente : bool
+
     def __init__(self, sala:Sala) -> None:
         super().__init__()
         self.sala = sala
-
-    # def ligaLuzes(self):
-    #     self.sala.liga('L_01')
-    #     self.sala.liga('L_02')
+        self._tempoLampada = None
+        self._spresRecente = False
 
     def run(self):
         while True:
             self.sala.detectaEntrada()
             self.sala.detectaTemp()
-            sleep(0.01)
+
+            # sistema de alarme LIGADO
+            if self.sala.sistemaAlarme:
+                if GPIO.input(self.sala.input['SPres']) or\
+                   GPIO.input(self.sala.input['SPor']) or\
+                   GPIO.input(self.sala.input['SJan']):
+
+                   self.sala.liga('AL_BZ')
+
+                else:
+                    self.sala.desliga('AL_BZ')
+
+            # sistema de alarme DESLIGADO
+            else:
+                # sensor de presenca
+                if GPIO.input(self.sala.input['SPres']):
+                    self.ativaLampadas()
+
+                # sensor de fumaca
+                if GPIO.input(self.sala.input['SFum']):
+                    self.sala.liga('AL_BZ')
+                elif self.sala.estado['AL_BZ']:
+                    self.sala.desliga('AL_BZ')
+            
+            if self._spresRecente:
+                self.checaLampadas()
+            sleep(0.1)
+
+    def ativaLampadas(self):
+        self.sala.liga('L_01')
+        self.sala.liga('L_02')
+        self._tempoLampada = time()
+        self._spresRecente = True
+    
+    def checaLampadas(self):
+        if time() - self._tempoLampada > 15.0:
+            self.sala.desliga('L_01')
+            self.sala.desliga('L_02')
+            self._tempoLampada = None
+            self._spresRecente = False

@@ -6,6 +6,8 @@ def main():
     config = sys.argv[1]
     st = SalaThread(Sala(config))
     st.start()
+    st.sala.sistemaAlarme = True
+
     while True:
         sleep(2)
         print(f'Pessoas: {st.sala.pessoasQtd}')
