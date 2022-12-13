@@ -12,6 +12,8 @@ class Sala:
     temp : float
     umid : float
     sistemaAlarme : bool
+    end : tuple
+    endCentral : tuple
 
     def __init__(self, config:str) -> None:
         with open(config) as f:
@@ -49,8 +51,12 @@ class Sala:
 
         self.estado = {k: False for k in self.output}
         self.dht22 = cfg['sensor_temperatura'][0]['gpio']
+        self.end = (cfg['ip_servidor_distribuido'], cfg['porta_servidor_distribuido'])
+        self.endCentral = (cfg['ip_servidor_central'], cfg['porta_servidor_central'])
         self.pessoasQtd = 0
         self.sistemaAlarme = False
+        self.umid = None
+        self.temp = None
 
         GPIO.setmode(GPIO.BCM) 
         for c in self.output.values():
@@ -69,12 +75,14 @@ class Sala:
             self.desliga(o)
 
     def liga(self, out:str) -> None:
-        GPIO.output(self.output[out], GPIO.HIGH)
-        self.estado[out] = True
+        if not self.estado[out]:
+            GPIO.output(self.output[out], GPIO.HIGH)
+            self.estado[out] = True
 
     def desliga(self, out:str) -> None:
-        GPIO.output(self.output[out], GPIO.LOW)
-        self.estado[out] = False
+        if self.estado[out]:
+            GPIO.output(self.output[out], GPIO.LOW)
+            self.estado[out] = False
 
     def detectaEntrada(self) -> None:
         if GPIO.event_detected(self.input['SC_IN']):
@@ -90,15 +98,17 @@ class Sala:
 class SalaThread(threading.Thread):
     _tempoLampada : float
     _spresRecente : bool
+    _rodando : bool
 
-    def __init__(self, sala:Sala) -> None:
+    def __init__(self, config:str) -> None:
         super().__init__()
-        self.sala = sala
+        self.sala = Sala(config)
         self._tempoLampada = None
         self._spresRecente = False
+        self._rodando = True
 
     def run(self):
-        while True:
+        while self._rodando:
             self.sala.detectaEntrada()
             self.sala.detectaTemp()
 
@@ -106,8 +116,8 @@ class SalaThread(threading.Thread):
             if self.sala.sistemaAlarme:
                 if GPIO.input(self.sala.input['SPres']) or\
                    GPIO.input(self.sala.input['SPor']) or\
-                   GPIO.input(self.sala.input['SJan']):
-
+                   GPIO.input(self.sala.input['SJan']) or\
+                   GPIO.input(self.sala.input['SFum']):
                    self.sala.liga('AL_BZ')
 
                 else:
@@ -122,22 +132,25 @@ class SalaThread(threading.Thread):
                 # sensor de fumaca
                 if GPIO.input(self.sala.input['SFum']):
                     self.sala.liga('AL_BZ')
-                elif self.sala.estado['AL_BZ']:
+                else:
                     self.sala.desliga('AL_BZ')
             
             if self._spresRecente:
                 self.checaLampadas()
             sleep(0.1)
 
-    def ativaLampadas(self):
+    def ativaLampadas(self) -> None:
         self.sala.liga('L_01')
         self.sala.liga('L_02')
         self._tempoLampada = time()
         self._spresRecente = True
     
-    def checaLampadas(self):
+    def checaLampadas(self) -> None:
         if time() - self._tempoLampada > 15.0:
             self.sala.desliga('L_01')
             self.sala.desliga('L_02')
             self._tempoLampada = None
             self._spresRecente = False
+
+    def encerra(self) -> None:
+        self._rodando = False
