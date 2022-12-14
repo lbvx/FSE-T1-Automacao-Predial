@@ -8,12 +8,12 @@ def main():
     config = sys.argv[1]
     st = SalaThread(config)
     st.start()
-    # # st.sala.sistemaAlarme = True
+    # st.sala.sistemaAlarme = True
 
     ct = ConexaoThread(st)
     ct.start()
 
-    sockDistr = socket.create_connection(('127.0.0.1', 10200))
+    # sockDistr = socket.create_connection(('127.0.0.1', 10200))
 
     # while True:
     #     print(f'Pessoas: {st.sala.pessoasQtd}')
@@ -26,8 +26,8 @@ def main():
     #     print('ct:', ct.is_alive())
     #     sleep(2)
 
+    # sockDistr.send('super')
     ct.join()
-    print('so long')
 
 if __name__ == '__main__':
     main()
