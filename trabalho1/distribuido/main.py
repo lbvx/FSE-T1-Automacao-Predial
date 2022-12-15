@@ -1,5 +1,5 @@
 from Sala import Sala, SalaThread
-from Conexao import ConexaoThread
+from Conexao import ConexaoDistribuido
 import sys
 from time import sleep
 import socket
@@ -11,7 +11,7 @@ def main():
     st.start()
     # sala.sistemaAlarme = True
 
-    ct = ConexaoThread(sala)
+    ct = ConexaoDistribuido(sala)
     ct.start()
 
     while True:

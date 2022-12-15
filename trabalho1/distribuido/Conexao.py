@@ -4,22 +4,22 @@ from time import sleep
 import socket
 from Sala import Sala
 
-class ConexaoThread(threading.Thread):
+class ConexaoDistribuido(threading.Thread):
     sala : Sala
-    sockCentral : socket.socket
+    socketCentral : socket.socket
     _rodando : bool
 
     def __init__(self, sala:Sala) -> None:
         super().__init__()
         self.sala = sala
-        self.sockCentral = None
+        self.socketCentral = None
 
-    def conectaCentral(self):
-        self.sockCentral = socket.create_connection(self.sala.endCentral, timeout=5.0)
+    def conectaCentral(self) -> None:
+        self.socketCentral = socket.create_connection(self.sala.endCentral, timeout=5.0)
         msg = {"nome": self.sala.nome,\
                "ip_servidor_distribuido": self.sala.end[0],\
                "porta_servidor_distribuido": self.sala.end[1]}
-        self.sockCentral.send(json.dumps(msg).encode('utf-8'))
+        self.socketCentral.send(json.dumps(msg).encode('utf-8'))
 
     def run(self):
         self._rodando = True

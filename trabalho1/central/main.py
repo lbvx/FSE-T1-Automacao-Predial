@@ -2,13 +2,13 @@ import sys
 from time import sleep
 import socket
 import json
+from Conexao import ConexaoCentral
 
 def main():
     end = sys.argv[1], int(sys.argv[2])
-    a = socket.create_server(end)
-    b = a.accept()[0]
-    c = b.recv(1024).decode('utf-8')
-    print(json.loads(c))
+    ct = ConexaoCentral(end)
+    ct.start()
+    ct.join()
 
 if __name__ == '__main__':
     main()
