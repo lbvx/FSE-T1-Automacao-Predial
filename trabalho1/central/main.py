@@ -4,7 +4,8 @@ import socket
 import json
 
 def main():
-    a = socket.create_server(('127.0.0.1', 10000))
+    end = sys.argv[1], int(sys.argv[2])
+    a = socket.create_server(end)
     b = a.accept()[0]
     c = b.recv(1024)
     print(json.loads(c))
