@@ -2,28 +2,33 @@ import threading
 import json
 from time import sleep
 import socket
-from Sala import SalaThread
+from Sala import Sala
 
 class ConexaoThread(threading.Thread):
-    def __init__(self, st:SalaThread) -> None:
+    sala : Sala
+    sockCentral : socket.socket
+    _rodando : bool
+
+    def __init__(self, sala:Sala) -> None:
         super().__init__()
-        self.st = st
+        self.sala = sala
         self.sockCentral = None
 
     def conectaCentral(self):
-        self.sockCentral = socket.create_connection(self.st.sala.endCentral, timeout=5.0)
+        self.sockCentral = socket.create_connection(self.sala.endCentral, timeout=5.0)
+        msg = {"nome": self.sala.nome,\
+               "ip_servidor_distribuido": self.sala.end[0],\
+               "porta_servidor_distribuido": self.sala.end[1]}
+        self.sockCentral.send(json.dumps(msg).encode('utf-8'))
 
     def run(self):
+        self._rodando = True
         self.conectaCentral()
-        print('asd:')
-        print(self.sockCentral)
-        sleep(2)
-        self.sockCentral.send(b'{"joao":false, "marcos":14.921}')
-        self.st.encerra()
-        self.st.join()
+        while self._rodando:
+            pass
 
-    def envia(self, out:str, est:bool) -> None:
+    def alteraSinal(self, out:str, est:bool) -> None:
         if est:
-            self.st.sala.liga(out)
+            self.sala.liga(out)
         else:
-            self.st.sala.desliga(out)
+            self.sala.desliga(out)

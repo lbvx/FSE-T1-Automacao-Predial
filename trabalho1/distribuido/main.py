@@ -6,28 +6,23 @@ import socket
 
 def main():
     config = sys.argv[1]
-    st = SalaThread(config)
+    sala = Sala(config)
+    st = SalaThread(sala)
     st.start()
-    # st.sala.sistemaAlarme = True
+    # sala.sistemaAlarme = True
 
-    ct = ConexaoThread(st)
+    ct = ConexaoThread(sala)
     ct.start()
 
-    # sockDistr = socket.create_connection(('127.0.0.1', 10200))
+    while True:
+        print(f'Pessoas: {st.sala.pessoasQtd}')
+        if not (st.sala.temp is None or st.sala.umid is None):
+            print(f'T = {st.sala.temp:.1f}°')
+            print(f'U = {st.sala.umid:.1f}%')
+        else:
+            print('Nao foi possivel ler temp/umid')
 
-    # while True:
-    #     print(f'Pessoas: {st.sala.pessoasQtd}')
-    #     if not (st.sala.temp is None or st.sala.umid is None):
-    #         print(f'T = {st.sala.temp:.1f}°')
-    #         print(f'U = {st.sala.umid:.1f}%')
-    #     else:
-    #         print('Nao foi possivel ler temp/umid')
-
-    #     print('ct:', ct.is_alive())
-    #     sleep(2)
-
-    # sockDistr.send('super')
-    ct.join()
+        sleep(2)
 
 if __name__ == '__main__':
     main()

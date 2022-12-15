@@ -2,7 +2,8 @@ import json
 import RPi.GPIO as GPIO
 import threading
 from time import sleep, time
-import Adafruit_DHT as DHT
+import board
+import adafruit_dht as DHT
 
 class Sala:
     input : dict
@@ -49,14 +50,20 @@ class Sala:
             elif i['tag'] == 'Sensor de Contagem de Pessoas Saída':
                 self.input['SC_OUT'] = i['gpio']
 
+        self.nome = cfg['nome']
         self.estado = {k: False for k in self.output}
-        self.dht22 = cfg['sensor_temperatura'][0]['gpio']
         self.end = (cfg['ip_servidor_distribuido'], cfg['porta_servidor_distribuido'])
         self.endCentral = (cfg['ip_servidor_central'], cfg['porta_servidor_central'])
         self.pessoasQtd = 0
         self.sistemaAlarme = False
         self.umid = None
         self.temp = None
+
+        dht22porta = cfg['sensor_temperatura'][0]['gpio']
+        if dht22porta == 18:
+            self.dhtDevice = DHT.DHT22(board.D18)
+        elif dht22porta == 4:
+            self.dhtDevice = DHT.DHT22(board.D4)
 
         GPIO.setmode(GPIO.BCM) 
         for c in self.output.values():
@@ -91,18 +98,21 @@ class Sala:
             self.pessoasQtd -= 1
 
     def detectaTemp(self) -> None:
-        d = DHT.read(DHT.DHT22, self.dht22)
-        self.umid = d[0]
-        self.temp = d[1]
+        try:
+            self.umid = self.dhtDevice.humidity
+            self.temp = self.dhtDevice.temperature
+        except RuntimeError:
+            self.umid = None
+            self.temp = None
 
 class SalaThread(threading.Thread):
     _tempoLampada : float
     _spresRecente : bool
     _rodando : bool
 
-    def __init__(self, config:str) -> None:
+    def __init__(self, sala:Sala) -> None:
         super().__init__()
-        self.sala = Sala(config)
+        self.sala = sala
         self._tempoLampada = None
         self._spresRecente = False
         self._rodando = True
