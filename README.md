@@ -53,3 +53,7 @@ python3 main.py <config>
 ```
 
 Onde \<config> é um arquivo JSON de configuração da placa, no mesmo padrão dos exemplos no repositório.
+
+## Apresentação
+
+[Vídeo](https://youtu.be/sNVEj-7zLSg)
