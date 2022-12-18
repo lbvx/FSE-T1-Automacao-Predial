@@ -40,6 +40,10 @@ Para ligar/desligar uma porta em todas as salas ao mesmo tempo, utilize "tudo" n
 
 Para ligar/desligar todas as portas de uma sala, utlize "tudo" no campo \<outputs>.
 
+Para ligar/desligar o sistema de alarme utilize "alarme" no capmo \<outputs>.
+
+Para ligar/desligar as duas lâmpadas utilize "lampadas" no campo \<outputs>.
+
 ## Distribuído
 
 Para rodar:
