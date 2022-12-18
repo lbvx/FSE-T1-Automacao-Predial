@@ -46,16 +46,16 @@ desligar <sala> <outputs> - desliga saídas de uma sala
 
         return False
 
-    def exibeSalas(self):
+    def exibeSalas(self) -> None:
         print('Salas conectadas: ', end='')
         print(*[s['nome'] for s in self.cc.conexoes], sep=', ')
 
-    def exibePessoas(self):
+    def exibePessoas(self) -> None:
         total = sum([e['pessoas'] for e in self.cc.estados.values()])
         print('Total: %d' % total, end=', ')
         print(*['%s: %d' % (c, self.cc.estados[c]['pessoas']) for c in self.cc.estados], sep=', ')
 
-    def exibeInfo(self, nomesala):
+    def exibeInfo(self, nomesala) -> None:
         est = self.cc.estados[nomesala]
         # print(nomesala)
         print('\tPessoas:', est['pessoas'])
@@ -67,7 +67,7 @@ desligar <sala> <outputs> - desliga saídas de uma sala
         print('\tSaídas:')
         print(*[f'\t  {n}: {int(e)}' for n, e in est['output'].items()], sep='\n')
 
-    def logCmd(self, cmd, sala):
+    def logCmd(self, cmd, sala) -> None:
         horario = datetime.now()
         while True:
             try:

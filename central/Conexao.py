@@ -5,7 +5,7 @@ import socket
 from datetime import datetime
 
 class AcceptThread(threading.Thread):
-    def __init__(self, sock:socket.socket, listaConexoes:list):
+    def __init__(self, sock:socket.socket, listaConexoes:list) -> None:
         super().__init__()
         self.socket = sock
         self.conexoes = listaConexoes
@@ -37,7 +37,7 @@ class ConexaoCentral(threading.Thread):
             msg = c['socket'].recv(2048)
             self.estados[c['nome']] = json.loads(msg)['estados']
 
-    def logAlarme(self):
+    def logAlarme(self) -> None:
         listaAlarme = [i for i, e in self.estados.items() if e['output']['AL_BZ']]
         horario = datetime.now()
         while True:

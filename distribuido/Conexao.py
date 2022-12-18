@@ -16,13 +16,19 @@ class ConexaoDistribuido(threading.Thread):
         self.socketCentral = None
 
     def conectaCentral(self) -> None:
-        self.socketCentral = socket.create_connection(self.sala.endCentral, timeout=5.0)
-        msg = {"nome": self.sala.nome,                          \
-               "ip_servidor_distribuido": self.sala.end[0],     \
-               "porta_servidor_distribuido": self.sala.end[1]}
-        self.socketCentral.send(json.dumps(msg).encode('utf-8'))
+        while True:
+            try:
+                self.socketCentral = socket.create_connection(self.sala.endCentral, timeout=5.0)
+                msg = {"nome": self.sala.nome,                          \
+                    "ip_servidor_distribuido": self.sala.end[0],     \
+                    "porta_servidor_distribuido": self.sala.end[1]}
+                self.socketCentral.send(json.dumps(msg).encode('utf-8'))
+                return
+            except ConnectionRefusedError:
+                print('falhou em conectar, tentando de novo em 1 seg')
+                sleep(1)
 
-    def enviaEstados(self):
+    def enviaEstados(self) -> None:
         msg = {}
         msg['nome'] = self.sala.nome
         est = {}
@@ -86,5 +92,5 @@ class ConexaoDistribuido(threading.Thread):
         else:
             self.sala.desliga(out)
 
-    def encerra(self):
+    def encerra(self) -> None:
         self._rodando = False
