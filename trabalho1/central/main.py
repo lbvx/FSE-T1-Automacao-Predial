@@ -3,12 +3,15 @@ from time import sleep
 import socket
 import json
 from Conexao import ConexaoCentral
+from Interface import Interface
 
-def main():
-    end = sys.argv[1], int(sys.argv[2])
+def main(argv):
+    end = argv[1], int(argv[2])
     ct = ConexaoCentral(end)
+    it = Interface(ct)
     ct.start()
-    ct.join()
+    it.start()
+    it.join()
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv)

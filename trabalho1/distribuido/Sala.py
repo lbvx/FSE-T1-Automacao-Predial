@@ -82,14 +82,23 @@ class Sala:
             self.desliga(o)
 
     def liga(self, out:str) -> None:
-        if not self.estado[out]:
-            GPIO.output(self.output[out], GPIO.HIGH)
-            self.estado[out] = True
+        try:
+            if not self.estado[out]:
+                GPIO.output(self.output[out], GPIO.HIGH)
+                self.estado[out] = True
+        except KeyError:
+            pass
 
     def desliga(self, out:str) -> None:
-        if self.estado[out]:
-            GPIO.output(self.output[out], GPIO.LOW)
-            self.estado[out] = False
+        try:
+            if self.estado[out]:
+                GPIO.output(self.output[out], GPIO.LOW)
+                self.estado[out] = False
+        except KeyError:
+            pass
+
+    def ler(self, inp:str):
+        return GPIO.input(self.input[inp])
 
     def detectaEntrada(self) -> None:
         if GPIO.event_detected(self.input['SC_IN']):
