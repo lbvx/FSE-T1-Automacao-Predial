@@ -15,7 +15,7 @@ menu - exibe esse menu
 salas - exibe salas conectadas
 pessoas - exibe quantidade de pessoas no prédio
 <nome da sala> - exibe estados de uma sala
-ligar <sala> <output> - liga saídas de uma sala
+ligar <sala> <outputs> - liga saídas de uma sala
 desligar <sala> <outputs> - desliga saídas de uma sala
              ''')
 
