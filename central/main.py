@@ -1,7 +1,4 @@
 import sys
-from time import sleep
-import socket
-import json
 from Conexao import ConexaoCentral
 from Interface import Interface
 

@@ -1,8 +1,6 @@
 from Sala import Sala, SalaThread
 from Conexao import ConexaoDistribuido
 import sys
-from time import sleep
-import socket
 
 def main(argv):
     config = argv[1]
